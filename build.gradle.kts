@@ -1,7 +1,7 @@
 buildscript {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
         gradlePluginPortal()
     }
     dependencies {
@@ -15,9 +15,11 @@ val ziweiRepositoryDomainName: String by project
 allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
         maven("https://jitpack.io")
-        maven("${ziweiRepositoryDomainName}repository/maven-public/")
+        maven("${ziweiRepositoryDomainName}/repository/maven-public/") {
+            isAllowInsecureProtocol = true
+        }
     }
 }
 

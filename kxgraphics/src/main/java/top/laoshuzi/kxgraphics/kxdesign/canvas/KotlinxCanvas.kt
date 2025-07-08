@@ -1,6 +1,11 @@
-package top.laoshuzi.kxgraphics.kxdesign
+package top.laoshuzi.kxgraphics.kxdesign.canvas
 
 import android.graphics.*
+import top.laoshuzi.kxgraphics.kxdesign.*
+import top.laoshuzi.kxgraphics.kxdesign.path.PathClipDesign
+import top.laoshuzi.kxgraphics.kxdesign.path.PathDesign
+import top.laoshuzi.kxgraphics.kxdesign.path.PathPaintDesign
+import top.laoshuzi.kxgraphics.kxdesign.path.design
 
 /**
  * Created by laoshuzi on 2021/1/5.
@@ -8,6 +13,26 @@ import android.graphics.*
 open class Design(var canvas: Canvas)
 
 open class PaintDesign(canvas: Canvas, var paint: Paint) : Design(canvas)
+
+//fun PaintDesign.designPath(
+//    path: Path = Path(),
+//    block: (PathPaintDesign.() -> Unit)? = null
+//): PathPaintDesign {
+//    return PathPaintDesign(path, canvas, paint).apply {
+//        block?.let { it() }
+//    }
+//}
+
+open class ClipDesign(canvas: Canvas) : Design(canvas)
+
+//fun ClipDesign.designPath(
+//    path: Path = Path(),
+//    block: (PathClipDesign.() -> Unit)? = null
+//): PathClipDesign {
+//    return PathClipDesign(path, canvas).apply {
+//        block?.let { it() }
+//    }
+//}
 
 /**
  *  填充RGB
@@ -203,8 +228,20 @@ fun PaintDesign.draw(path: Path) {
     drawPath(path)
 }
 
+fun PaintDesign.draw(pathDesign: PathDesign) {
+    drawPath(pathDesign)
+}
+
 fun PaintDesign.drawPath(path: Path) {
     canvas.drawPath(path, paint)
+}
+
+fun PaintDesign.drawPath(pathDesign: PathDesign, path: Path = Path()) {
+    pathDesign.design(path)
+}
+
+fun PaintDesign.drawPath(path: Path = Path(), block: PathPaintDesign.() -> Unit) {
+    PathPaintDesign(path, canvas, paint).apply(block)
 }
 
 /**
@@ -343,6 +380,33 @@ fun PaintDesign.drawVertices(
         indexCount,
         paint
     )
+}
+
+/**
+ *  绘制Picture
+ */
+fun Design.draw(picture: Picture) {
+    drawPicture(picture)
+}
+
+fun Design.draw(picture: Picture, dst: Rect) {
+    drawPicture(picture, dst)
+}
+
+fun Design.draw(picture: Picture, dst: RectF) {
+    drawPicture(picture, dst)
+}
+
+fun Design.drawPicture(picture: Picture) {
+    canvas.drawPicture(picture)
+}
+
+fun Design.drawPicture(picture: Picture, dst: Rect) {
+    canvas.drawPicture(picture, dst)
+}
+
+fun Design.drawPicture(picture: Picture, dst: RectF) {
+    canvas.drawPicture(picture, dst)
 }
 
 /**

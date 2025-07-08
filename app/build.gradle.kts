@@ -1,60 +1,64 @@
-import top.laoshuzi.dependencies.AndroidBuildConfig
 import top.laoshuzi.dependencies.deps.*
+import java.util.*
+import java.io.FileInputStream
 
 plugins {
     id("com.android.application")
     kotlin("android")
-    kotlin("android.extensions")
     kotlin("kapt")
 }
 
-val signKeyAlias: String by project
-val signKeyPassword: String by project
-val signStoreFile: String by project
-val signStorePassword: String by project
+val application_id: String by project
+val version_code: String by project
+val version_name: String by project
+val min_sdk_version: String by project
+val target_sdk_version: String by project
+val test_instrumentation_runner: String by project
+val consumer_pro_file: String by project
+val proguard_pro_file: String by project
+
+
+val keystoreProperties = Properties().apply {
+    load(FileInputStream(rootProject.file("keystore.properties")))
+}
 
 android {
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_18
+        targetCompatibility = JavaVersion.VERSION_18
     }
-    compileSdkVersion(AndroidBuildConfig.target_sdk)
+    compileSdk = target_sdk_version.toInt()
     defaultConfig {
-        applicationId = AndroidBuildConfig.application_id
-        minSdkVersion(AndroidBuildConfig.min_sdk)
-        targetSdkVersion(AndroidBuildConfig.target_sdk)
-        versionCode = AndroidBuildConfig.version_code
-        versionName = AndroidBuildConfig.version_name
-        testInstrumentationRunner = AndroidBuildConfig.test_instrumentation_runner
-        consumerProguardFiles(AndroidBuildConfig.consumer_file)
+        applicationId = application_id
+        versionCode = version_code.toInt()
+        versionName = version_name
+        minSdk = min_sdk_version.toInt()
+        targetSdk = target_sdk_version.toInt()
+        testInstrumentationRunner = test_instrumentation_runner
         multiDexEnabled = true
     }
-    lintOptions {
-        isAbortOnError = false
+    lint {
+        abortOnError = false
     }
     signingConfigs {
         create("release") {
-            keyAlias = signKeyAlias
-            keyPassword = signKeyPassword
-            storeFile = file(signStoreFile)
-            storePassword = signStorePassword
+            storeFile = file(keystoreProperties["signStoreFile"] as String)
+            storePassword = keystoreProperties["signStorePassword"] as String
+            keyAlias = keystoreProperties["signKeyAlias"] as String
+            keyPassword = keystoreProperties["signKeyPassword"] as String
         }
     }
     buildTypes {
         getByName("release") {
-            signingConfig = signingConfigs.getByName("release")
+            isDebuggable = false
             isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                AndroidBuildConfig.proguard_file
-            )
+            signingConfig = signingConfigs.getByName("release")
+            proguardFiles(proguard_pro_file)
         }
         getByName("debug") {
+            isDebuggable = true
             signingConfig = signingConfigs.getByName("release")
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                AndroidBuildConfig.proguard_file
-            )
+            proguardFiles(proguard_pro_file)
         }
     }
 }
@@ -67,9 +71,11 @@ dependencies {
 
     //kotlin
     implementation(deps(Kotlin.stdlib_jdk8))
+//    implementation(deps(Kotlinx.kotlinx_coroutines_android))
 
-    //common
-    implementation(deps(Common.core))
+    //structure
+    implementation("top.laoshuzi.structure:core:0.1.1")
+    implementation("top.laoshuzi.structure:qncx-structure:0.1.2")
 
     //test
 //    testImplementation(deps(Junit.junit))
@@ -78,76 +84,33 @@ dependencies {
 
     //koin
     implementation(deps(Koin.android))
-    implementation(deps(Koin.android_ext))
-    implementation(deps(Koin.android_scope))
-    implementation(deps(Koin.android_viewmodel))
 
     //component
+    implementation(deps(Android.android_material))
     implementation(deps(AndroidX.multidex))
-    implementation(deps(AndroidX.android_material))
     implementation(deps(AndroidX.legacy_support_v4))
+    implementation(deps(AndroidX.activity))
+    implementation(deps(AndroidX.fragment))
     implementation(deps(AndroidX.appcompat))
     implementation(deps(AndroidX.recyclerview))
     implementation(deps(AndroidX.cardview))
-    implementation(deps(AndroidX.constraint_layout))
+    implementation(deps(AndroidX.constraintlayout))
+    implementation(deps(AndroidX.viewpager2))
 
     //lifecycle
-    implementation(deps(AndroidX.lifecycle_livedata_ktx))
-    implementation(deps(AndroidX.lifecycle_viewmodel_ktx))
-    implementation(deps(AndroidX.lifecycle_reactivestreams_ktx))
-    implementation(deps(AndroidX.lifecycle_extensions))
-//    kapt(deps(AndroidX.lifecycle_compiler))
+//    implementation(deps(AndroidX.lifecycle_viewmodel_ktx))
+//    implementation(deps(AndroidX.lifecycle_livedata_ktx))
 
     //room
-    implementation(deps(AndroidX.room_runtime))
-    implementation(deps(AndroidX.room_rxjava2))
-    implementation(deps(AndroidX.room_ktx))
-//    implementation(deps(AndroidX.room_guava))
-    kapt(deps(AndroidX.room_compiler))
-
-    //paging
-    implementation(deps(AndroidX.paging_runtime_ktx))
-    implementation(deps(AndroidX.paging_rxjava2_ktx))
-
-    //navigation
-    implementation(deps(AndroidX.navigation_fragment_ktx))
-    implementation(deps(AndroidX.navigation_ui_ktx))
-
-    //arouter
-    implementation(deps(Arouter.api))
-    kapt(deps(Arouter.compiler))
-
-    //rxjava
-    implementation(deps(ReactiveX.rx_java))
-    implementation(deps(ReactiveX.rx_kotlin))
-    implementation(deps(ReactiveX.rx_android))
-    implementation(deps(ReactiveX.rx_http))
-    kapt(deps(ReactiveX.rx_http_compiler))
-
-    //bus
-    implementation(deps(LiveEventBus.live_event_busx))
-
-    //retrofit
-    implementation(deps(Retrofit.retrofit))
-    implementation(deps(Retrofit.adapter_rxjava2))
-    implementation(deps(Retrofit.converter_gson))
-
-    //okhttp
-    implementation(deps(Okhttp.okhttp))
-    implementation(deps(Okhttp.okhttp_logging_interceptor))
-
-    //json
-    implementation(deps(Fastjson.fastjson))
-    implementation(deps(Jackson.jackson_annotations))
-    implementation(deps(Jackson.jackson_databind))
+//    implementation(deps(AndroidX.room_runtime))
+//    implementation(deps(AndroidX.room_ktx))
+//    kapt(deps(AndroidX.room_compiler))
 
     //glide
-    implementation(deps(Glide.glide))
-    kapt(deps(Glide.glide_compiler))
+//    implementation(deps(AndroidEx.glide))
+//    kapt(deps(AndroidEx.glide_compiler))
 
     //tools
     implementation(deps(Utilcode.utilcodex))
-    implementation(deps(RvAdapter.zhy_rv_adapter))
-    implementation(deps(Fragmentation.fragmentationx_xuexuan))
 
 }

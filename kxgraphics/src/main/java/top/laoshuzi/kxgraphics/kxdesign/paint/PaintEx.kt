@@ -1,4 +1,4 @@
-package top.laoshuzi.kxgraphics.kxdesign
+package top.laoshuzi.kxgraphics.kxdesign.paint
 
 import android.graphics.Paint
 
